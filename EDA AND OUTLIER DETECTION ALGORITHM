@@ -23,24 +23,12 @@ a) Statistical Methods
 Z-Score: A standard method for detecting outliers by comparing the number of standard deviations an observation is from the mean.
 
 For each feature, calculate the Z-score:
-
-𝑍
-=
-𝑋
-−
-𝜇
-𝜎
-Z= 
-σ
-X−μ
 ​
- 
+Z=(X-𝜇)/𝜎
+
 Where 
-𝑋
 X is the data point, 
-𝜇
 μ is the mean, and 
-𝜎
 σ is the standard deviation.
 
 If the Z-score is greater than a threshold (commonly 3 or -3), it's considered an outlier.
@@ -50,24 +38,8 @@ IQR (Interquartile Range) Method: This method identifies outliers as values that
 Where Q1 and Q3 are the 25th and 75th percentiles of the data.
 
 Outliers are typically values that lie below 
-𝑄
-1
-−
-1.5
-×
-𝐼
-𝑄
-𝑅
-Q1−1.5×IQR or above 
-𝑄
-3
-+
-1.5
-×
-𝐼
-𝑄
-𝑅
-Q3+1.5×IQR.
+
+Q1-1.5 X IQR or above Q3+1.5XIQR
 
 b) Machine Learning Methods
 Isolation Forest: A tree-based model specifically designed for outlier detection.
