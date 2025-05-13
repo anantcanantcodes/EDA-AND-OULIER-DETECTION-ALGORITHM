@@ -1,0 +1,141 @@
+1. Data Preprocessing
+Before detecting outliers, we should clean and prepare the data:
+
+Handle Missing Data: Check for any missing values and decide whether to fill them with appropriate statistics (mean, median) or remove the rows/columns.
+
+Data Types: Verify the data types of each column (categorical, numerical) and encode them appropriately if necessary.
+
+Feature Engineering: Create new features if applicable, based on business understanding.
+
+2. Exploratory Data Analysis (EDA)
+EDA helps us understand the distribution of the data, which is essential for detecting outliers.
+
+Univariate Analysis: Visualize each feature independently to check for outliers in terms of extreme values using boxplots, histograms, etc.
+
+Multivariate Analysis: Check relationships between features using scatter plots, pair plots, etc., and detect multivariate outliers (e.g., through correlation analysis).
+
+Summary Statistics: Use mean, median, standard deviation, and interquartile range (IQR) to get a sense of typical value ranges.
+
+3. Outlier Detection Methods
+There are multiple techniques to detect outliers in a dataset. The most common ones include:
+
+a) Statistical Methods
+Z-Score: A standard method for detecting outliers by comparing the number of standard deviations an observation is from the mean.
+
+For each feature, calculate the Z-score:
+
+𝑍
+=
+𝑋
+−
+𝜇
+𝜎
+Z= 
+σ
+X−μ
+​
+ 
+Where 
+𝑋
+X is the data point, 
+𝜇
+μ is the mean, and 
+𝜎
+σ is the standard deviation.
+
+If the Z-score is greater than a threshold (commonly 3 or -3), it's considered an outlier.
+
+IQR (Interquartile Range) Method: This method identifies outliers as values that lie outside the range defined by the lower and upper bounds of the IQR (i.e., Q1 - 1.5 * IQR and Q3 + 1.5 * IQR).
+
+Where Q1 and Q3 are the 25th and 75th percentiles of the data.
+
+Outliers are typically values that lie below 
+𝑄
+1
+−
+1.5
+×
+𝐼
+𝑄
+𝑅
+Q1−1.5×IQR or above 
+𝑄
+3
++
+1.5
+×
+𝐼
+𝑄
+𝑅
+Q3+1.5×IQR.
+
+b) Machine Learning Methods
+Isolation Forest: A tree-based model specifically designed for outlier detection.
+
+Local Outlier Factor (LOF): Measures the local density deviation of a data point with respect to its neighbors.
+
+DBSCAN: A density-based spatial clustering algorithm that can also be used for outlier detection.
+
+c) Visualization-Based Methods
+Boxplots: A simple way to detect outliers in one-dimensional data.
+
+Pairplot/Heatmap: Used for multivariate data to identify any correlations or unusual relationships.
+
+4. Implementation in Python
+We can implement the above methods using Python. Here's an example of how you might perform an initial EDA and use IQR and Z-Score for outlier detection:
+
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from scipy import stats
+
+# Load your data
+# df = pd.read_csv("your_data.csv")
+
+# Check for missing values
+print(df.isnull().sum())
+
+# Descriptive statistics
+print(df.describe())
+
+# Univariate Analysis (Visualize each numerical feature)
+numerical_columns = df.select_dtypes(include=['float64', 'int64']).columns
+for col in numerical_columns:
+    plt.figure(figsize=(10,6))
+    sns.boxplot(x=df[col])
+    plt.title(f"Boxplot of {col}")
+    plt.show()
+
+# Outlier Detection using Z-Score
+z_scores = np.abs(stats.zscore(df[numerical_columns]))
+outliers_zscore = (z_scores > 3).all(axis=1)  # Rows where all features have a Z-score > 3
+
+# Outlier Detection using IQR
+Q1 = df[numerical_columns].quantile(0.25)
+Q3 = df[numerical_columns].quantile(0.75)
+IQR = Q3 - Q1
+outliers_iqr = ((df[numerical_columns] < (Q1 - 1.5 * IQR)) | (df[numerical_columns] > (Q3 + 1.5 * IQR))).any(axis=1)
+
+# Combining outlier results
+df['outliers_zscore'] = outliers_zscore
+df['outliers_iqr'] = outliers_iqr
+
+# Viewing rows with outliers based on Z-Score or IQR
+print(df[df['outliers_zscore'] | df['outliers_iqr']])
+
+# Visualize outliers using pairplot or heatmap (optional for multivariate outliers)
+sns.pairplot(df[numerical_columns])
+plt.show() 
+
+from sklearn.ensemble import IsolationForest
+
+# Initialize the model
+iso_forest = IsolationForest(contamination=0.05)  # 5% of the data are outliers
+outliers_iso = iso_forest.fit_predict(df[numerical_columns])
+
+# Mark outliers in the dataset
+df['outliers_iso'] = outliers_iso == -1  # -1 means outlier, 1 means inlier
+
+# Check the rows with outliers
+print(df[df['outliers_iso']])
